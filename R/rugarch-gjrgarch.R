@@ -828,9 +828,12 @@
 						e = as.double(res*res), nres = as.double(nres),
 						vexdata = as.double(vexsim[[i]]), T = as.integer(n+m),
 						m = as.integer(m), PACKAGE = "rugarch"), silent = TRUE)
+		
+		
+		                                                          
 		if(inherits(ans1, "try-error")) stop("\nugarchsim-->error: error in calling C function....\n")
 
-		sigmaSim[,i] = sqrt( ans1$h[(n.start + m + 1):(n+m)] )
+		#sigmaSim[,i] = sqrt( ans1$h[(n.start + m + 1):(n+m)] )
 		sigmaSim[,i] = ans1$h[(n.start + m + 1):(n+m)]^(1/2)
 		residSim[,i] = ans1$res[(n.start + m + 1):(n+m)]
 		if(modelinc[6]>0){
@@ -857,7 +860,7 @@
 			seriesSim[,i] = ans2$x[(n.start + m + 1):(n+m)]
 		}
 	}
-	sim = list(sigmaSim = sigmaSim, seriesSim = seriesSim, residSim = residSim)
+	sim = list(sigmaSim = sigmaSim, seriesSim = seriesSim, residSim = residSim, z = z)
 	model$modeldata$sigma = sigma
 	sol = new("uGARCHsim",
 			simulation = sim,
