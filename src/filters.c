@@ -279,7 +279,8 @@ void arfimaxfilter(int* model, double *pars, int *idx, double *x, double *res,
 			{
 				for(j=0; j<model[1];j++)
 				{
-					condm[i]+=pars[idx[1]+j]*(x[i-(j+1)]-constm[i-(j+1)]);
+					//condm[i]+=pars[idx[1]+j]*(x[i-(j+1)]-constm[i-(j+1)]);
+					condm[i]+=pars[idx[1]+j]*x[i-(j+1)];
 				}
 			}
 			if(model[2]>0)
@@ -332,7 +333,8 @@ void armaxsim(int *model, double *pars, int *idx, double *x, double *res, double
 		x[i] = constm[i];
 		for( j=0; j<model[1]; j++ )
 		{
-			x[i]+= pars[idx[1]+j] * (x[i-(j+1)] - constm[i-(j+1)]);
+			//x[i]+= pars[idx[1]+j] * (x[i-(j+1)] - constm[i-(j+1)]);
+			x[i]+= pars[idx[1]+j] * x[i-(j+1)];
 		}
 		for ( j=0; j<model[2]; j++ )
 		{
