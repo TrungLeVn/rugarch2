@@ -370,7 +370,7 @@ gedFit = function(x, control = list())
 # ------------------------------------------------------------------------------
 # Skewed Generalized Error Distribution (Fernandez and Steel)
 # ------------------------------------------------------------------------------
-dsged = function(x, mu = 0, sigma = 1, skew = 1.5, shape = 2, log = FALSE)
+dsged = function(x, mu = 0, sigma = 1, skew = 0, shape = 2, log = FALSE)
 {
 	n = c(length(x), length(mu), length(sigma), length(skew), length(shape))
 	maxn = max(n)
@@ -391,7 +391,7 @@ dsged = function(x, mu = 0, sigma = 1, skew = 1.5, shape = 2, log = FALSE)
 	}
 }
 
-psged = function(q, mu = 0, sigma = 1, skew = 1.5, shape = 2)
+psged = function(q, mu = 0, sigma = 1, skew = 0, shape = 2)
 {
 	n = c(length(q), length(mu), length(sigma), length(skew), length(shape))
 	maxn = max(n)
@@ -412,7 +412,7 @@ psged = function(q, mu = 0, sigma = 1, skew = 1.5, shape = 2)
 	}
 }
 
-qsged = function(p, mu = 0, sigma = 1, skew = 1.5, shape = 2)
+qsged = function(p, mu = 0, sigma = 1, skew = 0, shape = 2)
 {
 	n = c(length(p), length(mu), length(sigma), length(skew), length(shape))
 	maxn = max(n)
@@ -434,7 +434,7 @@ qsged = function(p, mu = 0, sigma = 1, skew = 1.5, shape = 2)
 }
 
 
-rsged = function(n, mu=0, sigma = 1, skew = 1.5, shape = 2)
+rsged = function(n, mu=0, sigma = 1, skew = 0, shape = 2)
 {
 	nn = c(length(mu), length(sigma), length(skew), length(shape))
 	if(nn[1]!=n) mu    = rep(mu[1], n)
@@ -461,7 +461,7 @@ sgedFit = function(x, control = list())
 		f = -sum(log(dsged(x, pars[1], pars[2], pars[3], pars[4])))
 		f }
 	fit = solnp(pars = start, fun = loglik, 
-			LB = c(-Inf, 0, 0, 0), UB = c(Inf, Inf, Inf, Inf), , control  = ctrl, x = x)
+			LB = c(-Inf, 0, -1, 0), UB = c(Inf, Inf, 1, Inf), , control  = ctrl, x = x)
 	names(fit$pars) = c("mu", "sigma", "skew", "shape")
 	return( fit )
 }
@@ -1426,9 +1426,9 @@ jsuFit = function(x, control = list())
 		shape.LB = 0
 		shape.UB = 0}
 	if (distribution == "sged"){
-		skew 	= 1
-		skew.LB	= 0.01
-		skew.UB	= 30
+		skew 	= 0
+		skew.LB	= -0.9999
+		skew.UB	= 0.9999
 		shape 	= 2
 		shape.LB = 0.1
 		shape.UB = 60}
@@ -2045,29 +2045,50 @@ dkurtosis = function(distribution = "norm", skew = 1, shape = 5, lambda = -0.5)
 	( ( ( gamma(1/shape)/gamma(3/shape) )^2 ) * ( gamma(5/shape)/gamma(1/shape) ) ) - 3
 }
 
-.sgedskew = function( skew, shape )
+#.sgedskew = function( skew, shape )
+#{
+#	lambda = sqrt ( 2^(-2/shape) * gamma(1/shape) / gamma(3/shape) )
+#	m1 = ((2^(1/shape)*lambda)^1 * gamma(2/shape) / gamma(1/shape))
+#	m2 = 1
+#	m3 = ((2^(1/shape)*lambda)^3 * gamma(4/shape) / gamma(1/shape))
+#	(skew - 1/skew) * ( ( m3 + 2 * m1^3 - 3 * m1 * m2 ) * ( skew^2 + (1/skew^2) ) + 3 * m1 * m2 - 4 * m1^3 )/
+#			( ( (m2 - m1^2) * (skew^2 + 1/skew^2) + 2 * m1^2 - m2) ^ (3/2) )
+#	
+#}
+
+.sgedskew = function( lambda, kappa )
 {
-	lambda = sqrt ( 2^(-2/shape) * gamma(1/shape) / gamma(3/shape) )
-	m1 = ((2^(1/shape)*lambda)^1 * gamma(2/shape) / gamma(1/shape))
-	m2 = 1
-	m3 = ((2^(1/shape)*lambda)^3 * gamma(4/shape) / gamma(1/shape))
-	(skew - 1/skew) * ( ( m3 + 2 * m1^3 - 3 * m1 * m2 ) * ( skew^2 + (1/skew^2) ) + 3 * m1 * m2 - 4 * m1^3 )/
-			( ( (m2 - m1^2) * (skew^2 + 1/skew^2) + 2 * m1^2 - m2) ^ (3/2) )
-	
+  A = gamma(2/kappa)/sqrt(gamma(1/kappa) * gamma(3/kappa))
+  S = sqrt(1 + 3*(lambda^2) - 4 * A^2 * lambda^2)
+  theta = sqrt(gamma(1/kappa)/gamma(3/kappa)) * 1/S
+  m = 2 * lambda * (A/S)
+  A3 = 4 * lambda * (1 + lambda^2) * gamma(4/kappa)* (1/gamma(1/kappa)) * theta^3
+  return(A3 - 3*m - m^3)
 }
 
-.sgedexkurt= function( skew, shape )
+#.sgedexkurt= function( lambda, kappa )
+#{
+#  lambda = sqrt ( 2^(-2/shape) * gamma(1/shape) / gamma(3/shape) )
+#  m1 = ((2^(1/shape)*lambda)^1 * gamma(2/shape) / gamma(1/shape))
+#  m2 = 1
+#  m3 = ((2^(1/shape)*lambda)^3 * gamma(4/shape) / gamma(1/shape))
+#  m4 = ((2^(1/shape)*lambda)^4 * gamma(5/shape) / gamma(1/shape))
+#  cm4 = (-3 * m1^4 * (skew - 1/skew)^4) + 
+#    ( 6 * m1^2 * (skew - 1/skew)^2 * m2*(skew^3 + 1/skew^3) )/(skew + 1/skew) - 
+#    ( 4 * m1*(skew - 1/skew) * m3 * (skew^4 - 1/skew^4) )/(skew+1/skew) + 
+#    ( m4 * (skew^5 + 1/skew^5) )/(skew + 1/skew)
+#  ( cm4/( ( (m2 - m1^2) * (skew^2 + 1/skew^2) + 2 * m1^2 - m2) ^ 2 ) ) - 3
+#}
+
+.sgedexkurt= function( lambda, kappa )
 {
-	lambda = sqrt ( 2^(-2/shape) * gamma(1/shape) / gamma(3/shape) )
-	m1 = ((2^(1/shape)*lambda)^1 * gamma(2/shape) / gamma(1/shape))
-	m2 = 1
-	m3 = ((2^(1/shape)*lambda)^3 * gamma(4/shape) / gamma(1/shape))
-	m4 = ((2^(1/shape)*lambda)^4 * gamma(5/shape) / gamma(1/shape))
-	cm4 = (-3 * m1^4 * (skew - 1/skew)^4) + 
-			( 6 * m1^2 * (skew - 1/skew)^2 * m2*(skew^3 + 1/skew^3) )/(skew + 1/skew) - 
-			( 4 * m1*(skew - 1/skew) * m3 * (skew^4 - 1/skew^4) )/(skew+1/skew) + 
-			( m4 * (skew^5 + 1/skew^5) )/(skew + 1/skew)
-	( cm4/( ( (m2 - m1^2) * (skew^2 + 1/skew^2) + 2 * m1^2 - m2) ^ 2 ) ) - 3
+  A = gamma(2/kappa)/sqrt(gamma(1/kappa) * gamma(3/kappa))
+  S = sqrt(1 + 3*(lambda^2) - 4 * A^2 * lambda^2)
+  theta = sqrt(gamma(1/kappa)/gamma(3/kappa)) * 1/S
+  m = 2 * lambda * (A/S)
+  A3 = 4 * lambda * (1 + lambda^2) * gamma(4/kappa)* (1/gamma(1/kappa)) * theta^3
+  A4 = (1 + 10 * (lambda^2) + 5 * (lambda^5)) * (gamma(5/kappa)/gamma(1/kappa)) * (theta^4)
+  return(A4 - 4 * A3 *m + 6 * (m^2) + 3 *(m^4))
 }
 
 .jsuskew = function( mu = 0, sigma = 1, skew, shape )
