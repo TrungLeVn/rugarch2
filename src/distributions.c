@@ -791,20 +791,33 @@ void c_qged(double *p, double *mu, double *sigma, double *shape, double *ans, in
  * Skew Generalized Error Distribution (Fernandez & Steel)
  * -----------------------------------------
  */
-double rsged(const double xi, const double nu)
+//double rsged(const double xi, const double nu)
+//{
+//	double weight, lambda, z, rr, m1, mu, sigma, xx, ans;
+//	weight = xi / (xi + 1.0/xi);
+//	z = runif(-1.0 * weight, 1.0 - weight);
+//	xx = (z < 0)? 1.0/xi : xi;
+//	rr = -1.0 * fabs(rged(nu))/xx * sign(z);
+//	lambda = sqrt ( pow(0.5, 2.0/nu) * gammafn(1.0/nu) / gammafn(3.0/nu) );
+//	//g  = nu / ( lambda * (pow(2, 1.0 +1.0/nu)) * gammafn(1.0/nu) );
+//	m1 = pow(2, 1.0/nu) * lambda * gammafn(2.0/nu) / gammafn(1.0/nu);
+//	mu = m1 * (xi - 1.0/xi);
+//	sigma = sqrt((1 - (m1 * m1)) * ( (xi * xi) + 1.0/(xi* xi) ) + 2 * (m1 * m1) - 1.0);
+//	ans = (rr - mu ) / sigma;
+//	return(ans);
+//}
+
+/*
+ * Skew Generalized Error Distribution by Theossidou
+ */
+double rsged(const double sk, const double ku)
 {
-	double weight, lambda, z, rr, m1, mu, sigma, xx, ans;
-	weight = xi / (xi + 1.0/xi);
-	z = runif(-1.0 * weight, 1.0 - weight);
-	xx = (z < 0)? 1.0/xi : xi;
-	rr = -1.0 * fabs(rged(nu))/xx * sign(z);
-	lambda = sqrt ( pow(0.5, 2.0/nu) * gammafn(1.0/nu) / gammafn(3.0/nu) );
-	//g  = nu / ( lambda * (pow(2, 1.0 +1.0/nu)) * gammafn(1.0/nu) );
-	m1 = pow(2, 1.0/nu) * lambda * gammafn(2.0/nu) / gammafn(1.0/nu);
-	mu = m1 * (xi - 1.0/xi);
-	sigma = sqrt((1 - (m1 * m1)) * ( (xi * xi) + 1.0/(xi* xi) ) + 2 * (m1 * m1) - 1.0);
-	ans = (rr - mu ) / sigma;
-	return(ans);
+  double lambda = sk;
+  double kappa = ku;
+  double z, ans;
+  z = runif(0.0,1.0);
+  ans = qsged(z,0.0,1.0,lambda,kappa);
+  return(ans);
 }
 
 void c_rsged(int *n, double *mu, double *sigma, double *skew, double *shape, double *ans)
@@ -812,31 +825,48 @@ void c_rsged(int *n, double *mu, double *sigma, double *skew, double *shape, dou
 	int i;
 	for(i=0;i<*n;i++)
 	{
-		ans[i] = mu[i] + rsged(skew[i], shape[i])*sigma[i];
+	  ans[i] = mu[i] + rsged(skew[i], shape[i])*sigma[i];
 	}
 }
 
-double dsgedstd(const double x, const double xi, const double nu)
+//double dsgedstd(const double x, const double xi, const double nu)
+//{
+//	double lambda, m1, mu, sigma, z, g, pdf, xxi;
+//	xxi=xi;
+//	lambda = sqrt(pow(1.0/2.0,(2/nu))*gammafn( 1.0/nu )/gammafn( 3.0/nu));
+//	g = nu/(lambda*(pow(2.0,1.0+(1.0/nu)))*gammafn( 1.0/nu));
+//	m1 = pow(2.0, (1.0/nu))*lambda*gammafn(2.0/nu)/gammafn(1.0/nu);
+//	mu = m1*(xi-1.0/xi);
+//	sigma = (1 - pow(m1,2.0))*(pow(xi,2.0)+1.0/(pow(xi,2.0))) + 2.0*(pow(m1,2))-1.0;
+//	sigma = sqrt(sigma);
+//	z = x*sigma+mu;
+//	if(z==0){
+//		xxi=1;
+//	}
+//	if(z<0){
+//		xxi = 1/xi;
+//	}
+//	g = 2.0/(xi + 1.0/xi);
+//	pdf = g*dgedstd(z/xxi, nu)*sigma;
+//	return pdf;
+//}
+
+/*
+ * Skew Generalized Error Distribution by Theossidou
+ * return the density function of standardized sged distribution
+ */
+double dsgedstd(const double z, const double lambda, const double nu)
 {
-	double lambda, m1, mu, sigma, z, g, pdf, xxi;
-	xxi=xi;
-	lambda = sqrt(pow(1.0/2.0,(2/nu))*gammafn( 1.0/nu )/gammafn( 3.0/nu));
-	g = nu/(lambda*(pow(2.0,1.0+(1.0/nu)))*gammafn( 1.0/nu));
-	m1 = pow(2.0, (1.0/nu))*lambda*gammafn(2.0/nu)/gammafn(1.0/nu);
-	mu = m1*(xi-1.0/xi);
-	sigma = (1 - pow(m1,2.0))*(pow(xi,2.0)+1.0/(pow(xi,2.0))) + 2.0*(pow(m1,2))-1.0;
-	sigma = sqrt(sigma);
-	z = x*sigma+mu;
-	if(z==0){
-		xxi=1;
-	}
-	if(z<0){
-		xxi = 1/xi;
-	}
-	g = 2.0/(xi + 1.0/xi);
-	pdf = g*dgedstd(z/xxi, nu)*sigma;
-	return pdf;
+  double C, theta, m, S, A, pdf;
+  A = gammafn(2.0/nu)*pow(gammafn(1.0/nu),-0.5)*pow(gammafn(3.0/nu),-0.5);
+  S = sqrt(1 + 3.0 * pow(lambda,2.0) - 4.0 * pow(A*lambda,2.0));
+  m = 2 * lambda * A * pow(S,-1.0); 
+  theta = pow(gammafn(1.0/nu),0.5) * pow(gammafn(3.0/nu),-0.5) * pow(S,-1.0);
+  C = 0.5 * (nu/theta) * pow(gammafn(1.0/nu),-1.0);
+  pdf = C * exp(-1.0 * (pow(fabs(z + m),nu))/(pow(1.0+signum(z + m)*lambda,nu)*pow(theta,nu)));
+  return pdf;
 }
+
 
 void c_dsged(double *x, double *mu, double *sigma, double *skew, double *shape, double *ans, int *n, int *logr)
 {
@@ -848,20 +878,41 @@ void c_dsged(double *x, double *mu, double *sigma, double *skew, double *shape, 
 	}
 }
 
-double psged(const double q, const double mu, const double sigma, const double xi, const double nu)
-{
-	double qx = (q-mu)/sigma;
-	double lambda = sqrt ( 1.0/pow(2.0, 2.0/nu) * gammafn(1.0/nu) / gammafn(3.0/nu) );
-	double m1 = pow(2.0, 1.0/nu) * lambda * gammafn(2.0/nu) / gammafn(1.0/nu);
-	double mux = m1*(xi-1.0/xi);
-	double sig =  sqrt((1.0-m1*m1)*(xi*xi+1/(xi*xi)) + 2.0*m1*m1 - 1);
-	double z = qx*sig + mux;
-	double Xi = (z<0)?1.0/xi:xi;
-	double g = 2.0/(xi + 1.0/xi);
-	double p = heaviside(z, 0) - signum(z) * g * Xi * pged(-fabs(z)/Xi, 0, 1, nu);
-	return( p );
-}
+//double psged(const double q, const double mu, const double sigma, const double xi, const double nu)
+//{
+//	double qx = (q-mu)/sigma;
+//	double lambda = sqrt ( 1.0/pow(2.0, 2.0/nu) * gammafn(1.0/nu) / gammafn(3.0/nu) );
+//	double m1 = pow(2.0, 1.0/nu) * lambda * gammafn(2.0/nu) / gammafn(1.0/nu);
+//	double mux = m1*(xi-1.0/xi);
+//	double sig =  sqrt((1.0-m1*m1)*(xi*xi+1/(xi*xi)) + 2.0*m1*m1 - 1);
+//	double z = qx*sig + mux;
+//	double Xi = (z<0)?1.0/xi:xi;
+//	double g = 2.0/(xi + 1.0/xi);
+//	double p = heaviside(z, 0) - signum(z) * g * Xi * pged(-fabs(z)/Xi, 0, 1, nu);
+//	return( p );
+//}
 
+
+double psged(const double value, const double mean,const double sig,const double sk,const double ku)
+{
+  double x = value;
+  double mu = mean;
+  double sigma = sig;
+  double lambda = sk;
+  double kappa = ku;
+  double ans;
+  sigma = sigma/sqrt((PI*(1.0+3.0*pow(lambda,2.0))*gammafn(3.0/kappa)- pow(16,1.0/kappa)*pow(lambda,2)*pow(gammafn(0.5+(1.0/kappa)),2)*gammafn(1.0/kappa))/(PI*gammafn(1.0/kappa)));
+  x = x + (pow(2.0,2.0/kappa)*sigma*lambda*gammafn(0.5+(1.0/kappa)))/sqrt(PI);
+  x = x - mu;
+  if(x < 0){
+    lambda = -1.0 * lambda;
+    x = -1.0 * x;
+    ans = 1.0 - ((1.0-lambda)/2.0 + ((1.0+lambda)/2)*pgamma(pow((x/(sigma*(1+lambda))),kappa),1.0/kappa,1.0,1,0));
+  } else{
+    ans = (1.0-lambda)/2.0 + ((1.0+lambda)/2)*pgamma(pow((x/(sigma*(1+lambda))),kappa),1.0/kappa,1.0,1,0);
+  } 
+  return(ans);
+}
 void c_psged(double *q, double *mu, double *sigma, double *skew, double *shape, double *ans, int *n)
 {
 	int i;
@@ -871,18 +922,43 @@ void c_psged(double *q, double *mu, double *sigma, double *skew, double *shape, 
 	}
 }
 
-double qsged(const double p, const double xi, const double nu)
+//double qsged(const double p, const double xi, const double nu)
+//{
+//	double lambda = sqrt ( 1.0/pow(2.0, 2.0/nu) * gammafn(1.0/nu) / gammafn(3.0/nu) );
+//	double m1 = pow(2.0, 1.0/nu) * lambda * gammafn(2.0/nu) / gammafn(1.0/nu);
+//	double mu = m1*(xi-1.0/xi);
+//	double sigma =  sqrt((1.0-m1*m1)*(xi*xi+1/(xi*xi)) + 2.0*m1*m1 - 1);
+//	double g = 2.0/(xi + 1.0/xi);
+//	double z = p - 0.5;
+//	double Xi = (z<0)?1.0/xi:xi;
+//	double q = (heaviside(z, 0) - signum(z) * p)/ (g* Xi);
+//	q = (-signum(z)*qged(q, nu)*Xi - mu)/sigma;
+//	return( q );
+//}
+
+double qsged(const double value, const double mean, const double sig, const double sk, const double ku)
 {
-	double lambda = sqrt ( 1.0/pow(2.0, 2.0/nu) * gammafn(1.0/nu) / gammafn(3.0/nu) );
-	double m1 = pow(2.0, 1.0/nu) * lambda * gammafn(2.0/nu) / gammafn(1.0/nu);
-	double mu = m1*(xi-1.0/xi);
-	double sigma =  sqrt((1.0-m1*m1)*(xi*xi+1/(xi*xi)) + 2.0*m1*m1 - 1);
-	double g = 2.0/(xi + 1.0/xi);
-	double z = p - 0.5;
-	double Xi = (z<0)?1.0/xi:xi;
-	double q = (heaviside(z, 0) - signum(z) * p)/ (g* Xi);
-	q = (-signum(z)*qged(q, nu)*Xi - mu)/sigma;
-	return( q );
+  double prob = value;
+  double mu = mean;
+  double sigma = sig;
+  double lambda = sk;
+  double kappa = ku;
+  sigma = sigma/sqrt((PI*(1.0+3.0*pow(lambda,2.0))*gammafn(3.0/kappa)- pow(16,1.0/kappa)*pow(lambda,2)*pow(gammafn(0.5+(1.0/kappa)),2)*gammafn(1.0/kappa))/(PI*gammafn(1.0/kappa)));
+  
+  double lam;
+  double out;
+  double ans;
+  
+  if(prob < (1.0-lambda)/2){
+    prob = 1 - prob;
+    lam = -1.0*lambda;
+    out = mu+ (-1.0)*sigma*(1+lam)*pow(qgamma(2.0*prob/(1.0 + lam) + (lam-1)/(lam+1),1.0/kappa,1.0,1,0),1.0/kappa);
+  }
+  else{
+    out = mu+ sigma*(1+lambda)*pow(qgamma(2.0*prob/(1.0 + lambda) + (lambda-1)/(lambda+1),1.0/kappa,1.0,1,0),1.0/kappa);
+  }
+  ans = out - (pow(2,2.0/kappa)*sigma*lambda*gammafn(0.5+(1.0/kappa)))/(sqrt(PI));
+  return(ans);
 }
 
 void c_qsged(double *p, double *mu, double *sigma, double *skew, double *shape, double *ans, int *n)
@@ -890,7 +966,8 @@ void c_qsged(double *p, double *mu, double *sigma, double *skew, double *shape, 
 	int i;
 	for(i=0;i<*n;i++)
 	{
-		ans[i] = qsged(p[i],skew[i],shape[i]) * sigma[i] + mu[i];
+		//ans[i] = qsged(p[i],skew[i],shape[i]) * sigma[i] + mu[i];
+		ans[i] = qsged(p[i],mu[i],sigma[i],skew[i],shape[i]);
 	}
 }
 

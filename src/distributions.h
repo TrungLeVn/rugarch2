@@ -138,7 +138,8 @@ double dsgedstd(const double , const double , const double );
 void c_dsged(double *x, double *mu, double *sigma, double *skew, double *shape, double *ans, int *n, int *logr);
 double psged(const double , const double , const double , const double , const double );
 void c_psged(double *q, double *mu, double *sigma, double *skew, double *shape, double *ans, int *n);
-double qsged(const double , const double, const double );
+//double qsged(const double , const double, const double );
+double qsged(const double , const double, const double, const double, const double ); // change to the specification as in theossidou
 void c_qsged(double *p, double *mu, double *sigma, double *skew, double *shape, double *ans, int *n);
 /*
  * -----------------------------------------
