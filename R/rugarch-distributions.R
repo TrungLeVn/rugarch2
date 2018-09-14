@@ -2056,13 +2056,13 @@ dkurtosis = function(distribution = "norm", skew = 1, shape = 5, lambda = -0.5)
 #	
 #}
 
-.sgedskew = function( lambda, kappa )
+.sgedskew = function(skew, shape)
 {
-  A = gamma(2/kappa)/sqrt(gamma(1/kappa) * gamma(3/kappa))
-  S = sqrt(1 + 3*(lambda^2) - 4 * A^2 * lambda^2)
-  theta = sqrt(gamma(1/kappa)/gamma(3/kappa)) * 1/S
-  m = 2 * lambda * (A/S)
-  A3 = 4 * lambda * (1 + lambda^2) * gamma(4/kappa)* (1/gamma(1/kappa)) * theta^3
+  A = gamma(2/shape)/sqrt(gamma(1/shape) * gamma(3/shape))
+  S = sqrt(1 + 3*(skew^2) - 4 * A^2 * skew^2)
+  theta = sqrt(gamma(1/shape)/gamma(3/shape)) * 1/S
+  m = 2 * skew * (A/S)
+  A3 = 4 * skew * (1 + skew^2) * gamma(4/shape)* (1/gamma(1/shape)) * theta^3
   return(A3 - 3*m - m^3)
 }
 
@@ -2080,14 +2080,14 @@ dkurtosis = function(distribution = "norm", skew = 1, shape = 5, lambda = -0.5)
 #  ( cm4/( ( (m2 - m1^2) * (skew^2 + 1/skew^2) + 2 * m1^2 - m2) ^ 2 ) ) - 3
 #}
 
-.sgedexkurt= function( lambda, kappa )
+.sgedexkurt= function( skew, shape )
 {
-  A = gamma(2/kappa)/sqrt(gamma(1/kappa) * gamma(3/kappa))
-  S = sqrt(1 + 3*(lambda^2) - 4 * A^2 * lambda^2)
-  theta = sqrt(gamma(1/kappa)/gamma(3/kappa)) * 1/S
-  m = 2 * lambda * (A/S)
-  A3 = 4 * lambda * (1 + lambda^2) * gamma(4/kappa)* (1/gamma(1/kappa)) * theta^3
-  A4 = (1 + 10 * (lambda^2) + 5 * (lambda^5)) * (gamma(5/kappa)/gamma(1/kappa)) * (theta^4)
+  A = gamma(2/shape)/sqrt(gamma(1/shape) * gamma(3/shape))
+  S = sqrt(1 + 3*(skew^2) - 4 * A^2 * skew^2)
+  theta = sqrt(gamma(1/shape)/gamma(3/shape)) * 1/S
+  m = 2 * skew * (A/S)
+  A3 = 4 * skew * (1 + skew^2) * gamma(4/shape)* (1/gamma(1/shape)) * theta^3
+  A4 = (1 + 10 * (skew^2) + 5 * (skew^5)) * (gamma(5/shape)/gamma(1/shape)) * (theta^4)
   return(A4 - 4 * A3 *m + 6 * (m^2) + 3 *(m^4))
 }
 
