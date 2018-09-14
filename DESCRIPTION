@@ -12,4 +12,4 @@ Collate: rugarch-imports.R rugarch-cwrappers.R rugarch-solvers.R rugarch-lossfn.
 LazyLoad: yes
 URL: http://www.unstarched.net, https://bitbucket.org/alexiosg
 License: GPL-3
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
