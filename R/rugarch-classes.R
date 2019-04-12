@@ -93,6 +93,7 @@ setClass("uGARCHboot",
 		representation(
 				fseries = "matrix",
 				fsigma = "matrix",
+				empz = "matrix",
 				bcoef = "data.frame",
 				model = "vector",
 				forc = "uGARCHforecast"),

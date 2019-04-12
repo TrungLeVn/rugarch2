@@ -638,6 +638,7 @@
 	ans = new("uGARCHboot",
 			fseries = (forcseries),
 			fsigma = (forcsigma),
+			empz  = as.matrix(empz),
 			bcoef = coefdist,
 			model = model,
 			forc = forc)
@@ -734,6 +735,7 @@
 	ans = new("uGARCHboot",
 			fseries = (forcseries),
 			fsigma = (forcsigma),
+			empz  = as.matrix(empz),
 			bcoef = coefdist,
 			model = model,
 			forc = forc)
