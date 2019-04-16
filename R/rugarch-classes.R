@@ -40,6 +40,7 @@ setClass("uGARCHfit",
 setClass("GARCHfilter", contains = c("rGARCH", "VIRTUAL"))
 setClass("uGARCHfilter",
 		representation(filter = "vector",
+		               fit = "vector",
 				model = "vector"),
 		contains = "GARCHfilter")
 #----------------------------------------------------------------------------------
@@ -125,7 +126,7 @@ setClass("uGARCHmultifit",
 				desc = "vector"))
 
 .validfitlist = function(object){
-	all(unlist(lapply(object@fit, FUN = function(x) is(x, "uGARCHfit"))))
+	all(unlist(lapply(object@fit, FUN = function(x) (is(x, "uGARCHfit"))|is(x, "uGARCHfilter"))))
 }
 
 setValidity("uGARCHmultifit", .validfitlist)

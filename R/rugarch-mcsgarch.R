@@ -563,7 +563,7 @@
 	filter$z = filter$residuals/filter$sigma
 
 	sol = new("uGARCHfilter",
-			filter = filter,
+			filter = filter,fit = filter,
 			model = model)
 	return(sol)
 }

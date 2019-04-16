@@ -467,7 +467,7 @@
 	model$n.start = out.sample
 	model$trunclag = trunclag
 	sol = new("uGARCHfilter",
-			filter = filter,
+			filter = filter,fit = filter,
 			model = model)
 	return(sol)
 }

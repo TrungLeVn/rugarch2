@@ -3887,9 +3887,14 @@ convergence = function(object){
 	UseMethod("convergence")
 }
 .convergence = function(object){
-	return( object@fit$convergence )
+  if(class(object) == "uGARCHfilter"){
+    return(0)
+  } else{
+	  return( object@fit$convergence )
+  }
 }
 setMethod("convergence", signature(object = "uGARCHfit"),  definition = .convergence)
+setMethod("convergence", signature(object = "uGARCHfilter"),  definition = .convergence)
 
 .convergenceroll = function(object){
 	nonc = object@model$noncidx

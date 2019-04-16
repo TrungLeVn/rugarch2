@@ -463,7 +463,7 @@
 	model$n.start = out.sample
 
 	sol = new("uGARCHfilter",
-			filter = filter,
+			filter = filter,fit = filter,
 			model = model)
 	return(sol)
 

@@ -447,13 +447,14 @@
 	filter$persistence = persist
 	filter$distribution = distribution
 	filter$ipars = ipars
+	filter$convergence = 0
 	model$modeldata$data = origdata
 	model$modeldata$index = origindex
 	model$modeldata$period = period
 	model$n.start = out.sample
 
 	sol = new("uGARCHfilter",
-			filter = filter,
+			filter = filter,fit = filter,
 			model = model)
 	return(sol)
 }
